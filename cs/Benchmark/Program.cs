@@ -9,6 +9,7 @@ namespace Benchmark
 {
     public abstract class AbstractSummator
     {
+        protected const int ThreadsCount = 8;
         protected const int Size = 1024 * 1024 * 64;
         protected static readonly List<int> A = MakeRandomList(Size);
         protected const int Const = 5;
@@ -29,8 +30,7 @@ namespace Benchmark
         public void Generalny()
         {
             Prepare();
-
-            var threads = Enumerable.Range(0, 4).Select(MakeThread).ToList();
+            var threads = Enumerable.Range(0, ThreadsCount).Select(MakeThread).ToList();
             foreach (var t in threads)
             {
                 t.Start();
@@ -74,7 +74,7 @@ namespace Benchmark
 
     public class NormalnySummator : AbstractSummator
     {
-        static int Step = Size / 4;
+        const int Step = Size / ThreadsCount;
 
         protected override Thread MakeThread(int z)
         {
