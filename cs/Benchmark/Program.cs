@@ -10,7 +10,6 @@ namespace Benchmark
     public abstract class AbstractSummator
     {
         protected const int Size = 1024 * 1024 * 64;
-        protected int Index = -1;
         protected static readonly List<int> A = MakeRandomList(Size);
         protected const int Const = 5;
         protected static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
@@ -21,9 +20,9 @@ namespace Benchmark
             return Enumerable.Repeat(0, size).Select(i => randNum.Next(0, 20)).ToList();
         }
 
-        void Prepare()
+        protected virtual void Prepare()
         {
-            Index = -1;
+            A = Abegin.ConvertAll(x => x);
         }
 
         [Benchmark]
@@ -47,14 +46,22 @@ namespace Benchmark
 
     public class GeneralnySummator : AbstractSummator
     {
+        int _index;
+        
+        protected override void Prepare()
+        {
+            base.Prepare();
+            _index = -1;
+        }
+
         protected override Thread MakeThread(int z)
         {
             return new Thread(() =>
             {
-                while (Index < A.Count - 1)
+                while (_index < A.Count - 1)
                 {
-                    var idx = Interlocked.Increment(ref Index);
-                    if (Index >= A.Count)
+                    var idx = Interlocked.Increment(ref _index);
+                    if (_index >= A.Count)
                     {
                         return;
                     }
