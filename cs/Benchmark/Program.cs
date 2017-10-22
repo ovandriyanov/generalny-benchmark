@@ -117,10 +117,10 @@ namespace Benchmark
         {
             return new Thread(() =>
             {
-                int begin = z * Step;
-                int end = begin + Step;
+                var begin = z * Step;
+                var end = begin + Step;
 
-                for (int idx = begin; idx < end; ++idx)
+                for (var idx = begin; idx < end; ++idx)
                 {
                     Result[idx] = A[idx] + Const;
                 }
