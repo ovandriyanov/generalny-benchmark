@@ -11,6 +11,7 @@ namespace Benchmark
     {
         protected const int ThreadsCount = 8;
         protected const int Size = 1024 * 1024 * 64;
+        
         protected static readonly List<int> A = MakeRandomList(Size);
         protected const int Const = 5;
         protected static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
@@ -43,8 +44,18 @@ namespace Benchmark
         protected abstract Thread MakeThread(int z);
     }
 
-    public class GeneralnySummator : AbstractSummator
+    public abstract class GeneralnySummator : AbstractSummator
     {
+        protected enum SyncType
+        {
+            Mutex,
+            Interlocked
+        }
+        
+        protected abstract SyncType IndexSyncType { get; }
+        static readonly object TipaMutex = new object();
+
+        
         int _index;
         
         protected override void Prepare()
@@ -59,16 +70,43 @@ namespace Benchmark
             {
                 while (_index < A.Count - 1)
                 {
-                    var idx = Interlocked.Increment(ref _index);
-                    if (_index >= A.Count)
+                    int currentIndex;
+                    switch (IndexSyncType)
+                    {
+                        case SyncType.Mutex:
+                            lock (TipaMutex)
+                            {
+                                currentIndex = ++_index;
+                            }
+                            break;
+                            
+                        case SyncType.Interlocked:
+                            currentIndex = Interlocked.Increment(ref _index);
+                            break;
+                            
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    
+                    if (currentIndex >= A.Count)
                     {
                         return;
                     }
                     
-                    Result[idx] = A[idx] + Const;
+                    Result[currentIndex] = A[currentIndex] + Const;
                 }
             });
         }
+    }
+
+    public class GeneralnyMutexnySummator : GeneralnySummator
+    {
+        protected override SyncType IndexSyncType => SyncType.Mutex;
+    }
+
+    public class GeneralnyInterlochnySummator : GeneralnySummator
+    {
+        protected override SyncType IndexSyncType => SyncType.Interlocked;
     }
 
     public class NormalnySummator : AbstractSummator
@@ -94,7 +132,8 @@ namespace Benchmark
     {
         public static void Main(string[] args)
         {
-            BenchmarkRunner.Run<GeneralnySummator>();
+            BenchmarkRunner.Run<GeneralnyInterlochnySummator>();
+            BenchmarkRunner.Run<GeneralnyMutexnySummator>();
             BenchmarkRunner.Run<NormalnySummator>();
         }
     }
