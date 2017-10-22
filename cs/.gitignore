@@ -44,4 +44,4 @@ Thumbs.db
 # dotCover
 *.dotCover
 
-BenchmarkDotNet.Artifacts/**
+*/BenchmarkDotNet.Artifacts/**
