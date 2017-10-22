@@ -9,7 +9,7 @@ namespace Benchmark
 {
     public abstract class AbstractSummator
     {
-        const int Size = 128 * 1024;
+        protected const int Size = 128 * 1024;
         
         protected int Index = -1;
         protected static readonly List<int> A = MakeRandomList(Size);
@@ -67,11 +67,31 @@ namespace Benchmark
         }
     }
 
+    public class NormalnySummator : AbstractSummator
+    {
+        static int Step = Size / 4;
+
+        protected override Thread MakeThread(int z)
+        {
+            return new Thread(() =>
+            {
+                int begin = z * Step;
+                int end = begin + Step;
+
+                for (int idx = begin; idx < end; ++idx)
+                {
+                    Result[idx] = A[idx] + Sum;
+                }
+            });
+        }
+    }
+
     public class Program
     {
         public static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<GeneralnySummator>();
+            BenchmarkRunner.Run<GeneralnySummator>();
+            BenchmarkRunner.Run<NormalnySummator>();
         }
     }
 }
