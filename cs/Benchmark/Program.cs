@@ -23,7 +23,6 @@ namespace Benchmark
 
         protected virtual void Prepare()
         {
-            A = Abegin.ConvertAll(x => x);
         }
 
         [Benchmark]
