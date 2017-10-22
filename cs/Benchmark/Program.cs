@@ -10,7 +10,7 @@ namespace Benchmark
     public abstract class AbstractSummator
     {
         protected const int Size = 128 * 1024;
-        
+
         protected int Index = -1;
         protected static readonly List<int> A = MakeRandomList(Size);
         static readonly List<int> B = MakeRandomList(Size);
@@ -27,12 +27,12 @@ namespace Benchmark
         {
             Index = -1;
         }
-        
+
         [Benchmark]
         public void Generalny()
         {
             Prepare();
-            
+
             var threads = Enumerable.Range(0, 4).Select(MakeThread).ToList();
             foreach (var t in threads)
             {
@@ -46,7 +46,7 @@ namespace Benchmark
 
         protected abstract Thread MakeThread(int z);
     }
-    
+
     public class GeneralnySummator : AbstractSummator
     {
         protected override Thread MakeThread(int z)
@@ -60,7 +60,7 @@ namespace Benchmark
                     {
                         return;
                     }
-                    
+
                     Result[idx] = A[idx] + Sum;
                 }
             });
