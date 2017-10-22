@@ -10,11 +10,11 @@ namespace Benchmark
     public abstract class AbstractSummator
     {
         protected const int ThreadsCount = 8;
-        protected const int Size = 1024 * 1024 * 64;
+        protected const int TestListSize = 1024 * 1024 * 64;
         
-        protected static readonly List<int> A = MakeRandomList(Size);
+        protected static readonly List<int> TestList = MakeRandomList(TestListSize);
         protected const int Const = 5;
-        protected static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
+        protected static readonly List<int> OutputList = new List<int>(Enumerable.Repeat(0, TestList.Count));
 
         static List<int> MakeRandomList(int size)
         {
@@ -41,7 +41,7 @@ namespace Benchmark
             }
         }
 
-        protected abstract Thread MakeThread(int z);
+        protected abstract Thread MakeThread(int threadNo);
     }
 
     public abstract class GeneralnySummator : AbstractSummator
@@ -64,11 +64,11 @@ namespace Benchmark
             _index = -1;
         }
 
-        protected override Thread MakeThread(int z)
+        protected override Thread MakeThread(int threadNo)
         {
             return new Thread(() =>
             {
-                while (_index < A.Count - 1)
+                while (_index < TestList.Count - 1)
                 {
                     int currentIndex;
                     switch (IndexSyncType)
@@ -88,12 +88,12 @@ namespace Benchmark
                             throw new ArgumentOutOfRangeException();
                     }
                     
-                    if (currentIndex >= A.Count)
+                    if (currentIndex >= TestList.Count)
                     {
                         return;
                     }
                     
-                    Result[currentIndex] = A[currentIndex] + Const;
+                    OutputList[currentIndex] = TestList[currentIndex] + Const;
                 }
             });
         }
@@ -111,18 +111,18 @@ namespace Benchmark
 
     public class NormalnySummator : AbstractSummator
     {
-        const int Step = Size / ThreadsCount;
+        const int ChunkSize = TestListSize / ThreadsCount;
 
-        protected override Thread MakeThread(int z)
+        protected override Thread MakeThread(int threadNo)
         {
             return new Thread(() =>
             {
-                var begin = z * Step;
-                var end = begin + Step;
+                var begin = threadNo * ChunkSize;
+                var end = begin + ChunkSize;
 
                 for (var idx = begin; idx < end; ++idx)
                 {
-                    Result[idx] = A[idx] + Const;
+                    OutputList[idx] = TestList[idx] + Const;
                 }
             });
         }
