@@ -13,8 +13,7 @@ namespace Benchmark
 
         protected int Index = -1;
         protected static readonly List<int> A = MakeRandomList(Size);
-        static readonly List<int> B = MakeRandomList(Size);
-        protected static readonly int Sum = B.Sum();
+        protected const int Const = 5;
         protected static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
 
         static List<int> MakeRandomList(int size)
@@ -60,8 +59,8 @@ namespace Benchmark
                     {
                         return;
                     }
-
-                    Result[idx] = A[idx] + Sum;
+                    
+                    Result[idx] = A[idx] + Const;
                 }
             });
         }
@@ -80,7 +79,7 @@ namespace Benchmark
 
                 for (int idx = begin; idx < end; ++idx)
                 {
-                    Result[idx] = A[idx] + Sum;
+                    Result[idx] = A[idx] + Const;
                 }
             });
         }
