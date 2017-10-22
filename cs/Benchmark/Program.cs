@@ -9,8 +9,7 @@ namespace Benchmark
 {
     public abstract class AbstractSummator
     {
-        protected const int Size = 128 * 1024;
-
+        protected const int Size = 1024 * 1024 * 64;
         protected int Index = -1;
         protected static readonly List<int> A = MakeRandomList(Size);
         protected const int Const = 5;
