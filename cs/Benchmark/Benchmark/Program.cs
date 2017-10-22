@@ -14,22 +14,23 @@ namespace Benchmark
 
     public class NormalnyVsGeneralny
     {
-        private static int i = -1;
-        private static readonly List<int> a = MakeRandomList(128 * 1024);
-        private static readonly List<int> b = MakeRandomList(128 * 1024);
-        private static readonly int sum = b.Sum();
-        private static List<int> result = new List<int>(Enumerable.Repeat(0, a.Count));
+        int _index = -1;
+        static readonly List<int> A = MakeRandomList(128 * 1024);
+        static readonly List<int> B = MakeRandomList(128 * 1024);
+        static readonly int Sum = B.Sum();
+        static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
 
-        public static List<int> MakeRandomList(int size)
+        static List<int> MakeRandomList(int size)
         {
-            Random randNum = new Random();
+            var randNum = new Random();
             return Enumerable.Repeat(0, size).Select(i => randNum.Next(0, 20)).ToList();
         }
 
         [Benchmark]
         public void Generalny()
         {
-            var threads = Enumerable.Range(0, 3).Select(MakeGeneralnyThread).ToList();
+            _index = -1;
+            var threads = Enumerable.Range(0, 4).Select(MakeGeneralnyThread).ToList();
             foreach (var t in threads)
             {
                 t.Start();
@@ -40,15 +41,19 @@ namespace Benchmark
             }
         }
 
-        private static Thread MakeGeneralnyThread(int z)
+        Thread MakeGeneralnyThread(int z)
         {
-            Console.WriteLine("Making thread");
-            var sum = b.Sum();
-            return new Thread(()=>{
-                while(i < a.Count - 1)
+            return new Thread(() =>
+            {
+                while (_index < A.Count - 1)
                 {
-                    var idx = Interlocked.Increment(ref i);
-                    result[idx] = a[idx] + sum;
+                    var idx = Interlocked.Increment(ref _index);
+                    if (_index >= A.Count)
+                    {
+                        return;
+                    }
+                    
+                    Result[idx] = A[idx] + Sum;
                 }
             });
         }
@@ -61,5 +66,4 @@ namespace Benchmark
             var summary = BenchmarkRunner.Run<NormalnyVsGeneralny>();
         }
     }
-
 }
