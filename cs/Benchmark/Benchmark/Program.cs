@@ -7,18 +7,15 @@ using BenchmarkDotNet.Running;
 
 namespace Benchmark
 {
-    using System;
-    using System.Threading;
-    using System.Linq;
-    using System.Collections.Generic;
-
-    public class NormalnyVsGeneralny
+    public abstract class AbstractSummator
     {
-        int _index = -1;
-        static readonly List<int> A = MakeRandomList(128 * 1024);
-        static readonly List<int> B = MakeRandomList(128 * 1024);
-        static readonly int Sum = B.Sum();
-        static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
+        const int Size = 128 * 1024;
+        
+        protected int Index = -1;
+        protected static readonly List<int> A = MakeRandomList(Size);
+        static readonly List<int> B = MakeRandomList(Size);
+        protected static readonly int Sum = B.Sum();
+        protected static readonly List<int> Result = new List<int>(Enumerable.Repeat(0, A.Count));
 
         static List<int> MakeRandomList(int size)
         {
@@ -26,11 +23,17 @@ namespace Benchmark
             return Enumerable.Repeat(0, size).Select(i => randNum.Next(0, 20)).ToList();
         }
 
+        void Prepare()
+        {
+            Index = -1;
+        }
+        
         [Benchmark]
         public void Generalny()
         {
-            _index = -1;
-            var threads = Enumerable.Range(0, 4).Select(MakeGeneralnyThread).ToList();
+            Prepare();
+            
+            var threads = Enumerable.Range(0, 4).Select(MakeThread).ToList();
             foreach (var t in threads)
             {
                 t.Start();
@@ -41,14 +44,19 @@ namespace Benchmark
             }
         }
 
-        Thread MakeGeneralnyThread(int z)
+        protected abstract Thread MakeThread(int z);
+    }
+    
+    public class GeneralnySummator : AbstractSummator
+    {
+        protected override Thread MakeThread(int z)
         {
             return new Thread(() =>
             {
-                while (_index < A.Count - 1)
+                while (Index < A.Count - 1)
                 {
-                    var idx = Interlocked.Increment(ref _index);
-                    if (_index >= A.Count)
+                    var idx = Interlocked.Increment(ref Index);
+                    if (Index >= A.Count)
                     {
                         return;
                     }
@@ -63,7 +71,7 @@ namespace Benchmark
     {
         public static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<NormalnyVsGeneralny>();
+            var summary = BenchmarkRunner.Run<GeneralnySummator>();
         }
     }
 }
