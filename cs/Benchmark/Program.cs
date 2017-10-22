@@ -9,7 +9,20 @@ namespace Benchmark
 {
     public abstract class AbstractSummator
     {
-        protected const int ThreadsCount = 8;
+        enum Threadness
+        {
+            I9Extremalny = 36,
+            I9Ubergod = 20,
+            I7Ultragod = 12,
+            I7God = 8,
+            I5Pleb = 4,
+            Amd = 3,
+            Bomj = 2,
+            Vintage = 1,
+            Perfocarty = 0
+        }
+        
+        protected const int ThreadsCount = (int) Threadness.I7God;
         protected const int TestListSize = 1024 * 1024 * 64;
         
         protected static readonly List<int> TestList = MakeRandomList(TestListSize);
