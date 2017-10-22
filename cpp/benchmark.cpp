@@ -55,6 +55,16 @@ struct generalny_traits
     }
 };
 
+struct scalarny_traits
+{
+    template <typename InputIterator, typename OutputIterator>
+    static void sum(InputIterator a, InputIterator b, OutputIterator c, size_t size)
+    {
+        while(size--)
+            *c++ = *a++ + *b++;
+    }
+};
+
 static auto make_random_array(int size)
 {
     auto array = std::make_unique<int[]>(size);
@@ -79,8 +89,10 @@ static void sum_benchmark(benchmark::State& state)
 }
 auto normalny_sum_benchmark = sum_benchmark<normalny_traits>;
 auto generalny_sum_benchmark = sum_benchmark<generalny_traits>;
+auto scalarny_sum_benchmark = sum_benchmark<scalarny_traits>;
 
 BENCHMARK(normalny_sum_benchmark)->Arg(1024)->Arg(4096)->Arg(1024 * 1024);
 BENCHMARK(generalny_sum_benchmark)->Arg(1024)->Arg(4096)->Arg(1024 * 1024);
+BENCHMARK(scalarny_sum_benchmark)->Arg(1024)->Arg(4096)->Arg(1024 * 1024);
 
 BENCHMARK_MAIN();
